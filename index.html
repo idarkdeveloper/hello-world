@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FitTrack - Your Fitness Companion</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.json" />
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-inner">
+        <h1 class="logo">&#127939; FitTrack</h1>
+        <span class="date-label" id="dateLabel"></span>
+      </div>
+    </header>
+
+    <!-- Setup Modal -->
+    <div class="modal-overlay" id="setupModal">
+      <div class="modal">
+        <h2>&#9997; Setup Your Profile</h2>
+        <p class="modal-sub">Needed to calculate your daily calorie goal</p>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Age</label>
+            <input type="number" id="setupAge" placeholder="e.g. 25" min="1" max="120" />
+          </div>
+          <div class="form-group">
+            <label>Weight (kg)</label>
+            <input type="number" id="setupWeight" placeholder="e.g. 70" min="1" />
+          </div>
+          <div class="form-group">
+            <label>Height (cm)</label>
+            <input type="number" id="setupHeight" placeholder="e.g. 175" min="1" />
+          </div>
+          <div class="form-group">
+            <label>Gender</label>
+            <select id="setupGender">
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label>Activity Level</label>
+            <select id="setupActivity">
+              <option value="1.2">Sedentary (little/no exercise)</option>
+              <option value="1.375">Lightly Active (1-3 days/week)</option>
+              <option value="1.55" selected>Moderately Active (3-5 days/week)</option>
+              <option value="1.725">Very Active (6-7 days/week)</option>
+              <option value="1.9">Extra Active (intense daily)</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label>Daily Step Goal</label>
+            <input type="number" id="setupStepGoal" placeholder="e.g. 10000" value="10000" min="100" />
+          </div>
+        </div>
+        <button class="btn btn-primary full" id="saveProfileBtn">Save & Start &#10003;</button>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav">
+      <button class="nav-btn active" data-tab="dashboard">&#128200; Dashboard</button>
+      <button class="nav-btn" data-tab="steps">&#128099; Steps</button>
+      <button class="nav-btn" data-tab="calories">&#127829; Calories</button>
+      <button class="nav-btn" data-tab="reminder">&#9201; Reminder</button>
+      <button class="nav-btn" data-tab="profile">&#128100; Profile</button>
+    </nav>
+
+    <!-- Dashboard Tab -->
+    <section class="tab active" id="tab-dashboard">
+      <div class="summary-grid">
+        <div class="summary-card steps-card">
+          <div class="card-icon">&#128099;</div>
+          <div class="card-info">
+            <span class="card-value" id="dashSteps">0</span>
+            <span class="card-label">Steps Today</span>
+          </div>
+          <div class="card-progress">
+            <svg viewBox="0 0 36 36" class="progress-ring">
+              <path class="ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+              <path class="ring-fill steps-ring" id="stepsRing" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+            </svg>
+            <span class="ring-pct" id="stepsPct">0%</span>
+          </div>
+        </div>
+
+        <div class="summary-card cal-need-card">
+          <div class="card-icon">&#128293;</div>
+          <div class="card-info">
+            <span class="card-value" id="dashCalNeeded">--</span>
+            <span class="card-label">Calories Required</span>
+          </div>
+        </div>
+
+        <div class="summary-card cal-taken-card">
+          <div class="card-icon">&#127829;</div>
+          <div class="card-info">
+            <span class="card-value" id="dashCalTaken">0</span>
+            <span class="card-label">Calories Taken</span>
+          </div>
+          <div class="card-progress">
+            <svg viewBox="0 0 36 36" class="progress-ring">
+              <path class="ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+              <path class="ring-fill cal-ring" id="calRing" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+            </svg>
+            <span class="ring-pct" id="calPct">0%</span>
+          </div>
+        </div>
+
+        <div class="summary-card reminder-card">
+          <div class="card-icon">&#9201;</div>
+          <div class="card-info">
+            <span class="card-value" id="dashReminderStatus">Off</span>
+            <span class="card-label">Walk Reminder</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="balance-bar-wrap">
+        <h3>Calorie Balance</h3>
+        <div class="balance-row">
+          <span>Required: <strong id="balNeeded">-- kcal</strong></span>
+          <span>Taken: <strong id="balTaken">0 kcal</strong></span>
+        </div>
+        <div class="balance-track">
+          <div class="balance-fill" id="balanceFill"></div>
+        </div>
+        <p class="balance-msg" id="balanceMsg">Set up your profile to see your calorie goal.</p>
+      </div>
+
+      <div class="tip-box" id="dashTip">
+        <span>&#128161;</span> <span id="tipText">Loading tip...</span>
+      </div>
+    </section>
+
+    <!-- Steps Tab -->
+    <section class="tab" id="tab-steps">
+      <div class="step-hero">
+        <div class="big-ring-wrap">
+          <svg viewBox="0 0 120 120" class="big-ring">
+            <circle class="big-ring-bg" cx="60" cy="60" r="54"/>
+            <circle class="big-ring-fill" id="bigStepsRing" cx="60" cy="60" r="54"
+              stroke-dasharray="0 339.29" stroke-dashoffset="84.82"/>
+          </svg>
+          <div class="big-ring-center">
+            <span class="big-step-count" id="bigStepCount">0</span>
+            <span class="big-step-label">steps</span>
+          </div>
+        </div>
+        <div class="step-goal-row">
+          <span>Goal: <strong id="stepGoalDisplay">10,000</strong></span>
+          <span id="stepsRemaining">10,000 more to go</span>
+        </div>
+      </div>
+
+      <div class="step-actions">
+        <div class="pedometer-section">
+          <h3>&#128247; Pedometer</h3>
+          <p class="section-sub" id="pedometerStatus">Tap to start automatic step detection via your device sensor.</p>
+          <button class="btn btn-primary" id="togglePedometerBtn">&#9654; Start Pedometer</button>
+          <div class="sensor-indicator" id="sensorIndicator"></div>
+        </div>
+
+        <div class="manual-section">
+          <h3>&#9997; Manual Entry</h3>
+          <div class="input-row">
+            <input type="number" id="manualSteps" placeholder="Enter steps" min="1" />
+            <button class="btn btn-secondary" id="addStepsBtn">Add</button>
+          </div>
+        </div>
+
+        <div class="step-stats">
+          <div class="stat-item">
+            <span class="stat-val" id="statDistance">0.0 km</span>
+            <span class="stat-lbl">Distance</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-val" id="statCalBurned">0 kcal</span>
+            <span class="stat-lbl">Calories Burned</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-val" id="statActiveMin">0 min</span>
+            <span class="stat-lbl">Active Time</span>
+          </div>
+        </div>
+
+        <button class="btn btn-danger-outline" id="resetStepsBtn">&#8635; Reset Steps</button>
+      </div>
+    </section>
+
+    <!-- Calories Tab -->
+    <section class="tab" id="tab-calories">
+      <div class="cal-overview">
+        <div class="cal-donut-wrap">
+          <svg viewBox="0 0 120 120" class="big-ring">
+            <circle class="big-ring-bg" cx="60" cy="60" r="54"/>
+            <circle class="big-ring-fill cal-big-ring" id="bigCalRing" cx="60" cy="60" r="54"
+              stroke-dasharray="0 339.29" stroke-dashoffset="84.82"/>
+          </svg>
+          <div class="big-ring-center">
+            <span class="big-step-count" id="bigCalTaken">0</span>
+            <span class="big-step-label">kcal eaten</span>
+          </div>
+        </div>
+        <div class="cal-nums">
+          <div class="cal-num-item">
+            <span class="cal-num" id="calNeededDisplay">--</span>
+            <span class="cal-num-lbl">&#128293; Required</span>
+          </div>
+          <div class="cal-num-item">
+            <span class="cal-num" id="calRemainingDisplay">--</span>
+            <span class="cal-num-lbl">&#9989; Remaining</span>
+          </div>
+          <div class="cal-num-item">
+            <span class="cal-num" id="calBurnedDisplay">0</span>
+            <span class="cal-num-lbl">&#127939; Burned</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add Food -->
+      <div class="add-food-section">
+        <h3>&#127829; Log Food</h3>
+        <div class="quick-foods">
+          <button class="food-chip" data-name="Apple" data-cal="95">Apple 95</button>
+          <button class="food-chip" data-name="Banana" data-cal="105">Banana 105</button>
+          <button class="food-chip" data-name="Rice (1 cup)" data-cal="206">Rice 206</button>
+          <button class="food-chip" data-name="Chicken Breast" data-cal="165">Chicken 165</button>
+          <button class="food-chip" data-name="Egg" data-cal="78">Egg 78</button>
+          <button class="food-chip" data-name="Bread (1 slice)" data-cal="79">Bread 79</button>
+          <button class="food-chip" data-name="Milk (1 cup)" data-cal="149">Milk 149</button>
+          <button class="food-chip" data-name="Salad" data-cal="20">Salad 20</button>
+        </div>
+        <div class="custom-food-row">
+          <input type="text" id="foodName" placeholder="Food name" />
+          <input type="number" id="foodCal" placeholder="kcal" min="1" />
+          <button class="btn btn-primary" id="addFoodBtn">Add</button>
+        </div>
+      </div>
+
+      <!-- Food Log -->
+      <div class="food-log-section">
+        <div class="food-log-header">
+          <h3>&#128203; Today's Log</h3>
+          <button class="btn btn-danger-outline small" id="clearFoodBtn">Clear All</button>
+        </div>
+        <ul class="food-list" id="foodList">
+          <li class="food-empty">No food logged yet. Start adding meals above!</li>
+        </ul>
+        <div class="food-total-row">
+          <span>Total Calories Taken:</span>
+          <strong id="foodTotal">0 kcal</strong>
+        </div>
+      </div>
+    </section>
+
+    <!-- Reminder Tab -->
+    <section class="tab" id="tab-reminder">
+      <div class="reminder-hero">
+        <div class="reminder-icon-big">&#9201;</div>
+        <h2>Walk Reminder</h2>
+        <p>Stay active! Set an interval and we'll remind you to take a walk.</p>
+      </div>
+
+      <div class="reminder-config">
+        <div class="form-group">
+          <label>Reminder Interval</label>
+          <select id="reminderInterval">
+            <option value="15">Every 15 minutes</option>
+            <option value="30" selected>Every 30 minutes</option>
+            <option value="45">Every 45 minutes</option>
+            <option value="60">Every 1 hour</option>
+            <option value="90">Every 1.5 hours</option>
+            <option value="120">Every 2 hours</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Custom Message</label>
+          <input type="text" id="reminderMessage" placeholder="Time to walk! &#127939;" value="Time to walk! &#127939;" />
+        </div>
+
+        <div class="reminder-toggle-row">
+          <span>Reminders</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="reminderToggle" />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <p class="reminder-note" id="reminderNote">Reminders are off. Toggle to enable.</p>
+      </div>
+
+      <div class="reminder-history">
+        <h3>&#128276; Recent Reminders</h3>
+        <ul id="reminderLog" class="reminder-log">
+          <li class="food-empty">No reminders fired yet.</li>
+        </ul>
+      </div>
+
+      <div class="notification-permission" id="notifPermissionBox" style="display:none">
+        <p>&#128276; Browser notifications are needed for reminders when the tab is in the background.</p>
+        <button class="btn btn-primary" id="requestNotifBtn">Allow Notifications</button>
+      </div>
+    </section>
+
+    <!-- Profile Tab -->
+    <section class="tab" id="tab-profile">
+      <div class="profile-header">
+        <div class="avatar">&#128100;</div>
+        <div>
+          <h2 id="profileName">Fitness User</h2>
+          <p id="profileTagline">Edit your profile below</p>
+        </div>
+      </div>
+
+      <div class="profile-form">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Age</label>
+            <input type="number" id="profileAge" placeholder="Age" min="1" max="120" />
+          </div>
+          <div class="form-group">
+            <label>Weight (kg)</label>
+            <input type="number" id="profileWeight" placeholder="Weight" min="1" />
+          </div>
+          <div class="form-group">
+            <label>Height (cm)</label>
+            <input type="number" id="profileHeight" placeholder="Height" min="1" />
+          </div>
+          <div class="form-group">
+            <label>Gender</label>
+            <select id="profileGender">
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label>Activity Level</label>
+            <select id="profileActivity">
+              <option value="1.2">Sedentary</option>
+              <option value="1.375">Lightly Active</option>
+              <option value="1.55">Moderately Active</option>
+              <option value="1.725">Very Active</option>
+              <option value="1.9">Extra Active</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label>Daily Step Goal</label>
+            <input type="number" id="profileStepGoal" placeholder="Steps goal" min="100" />
+          </div>
+        </div>
+        <button class="btn btn-primary full" id="saveProfileBtnProfile">Save Profile</button>
+      </div>
+
+      <div class="profile-stats">
+        <h3>&#127942; Your Stats</h3>
+        <div class="stats-grid">
+          <div class="stat-box">
+            <span class="stat-box-val" id="profileBMR">--</span>
+            <span class="stat-box-lbl">BMR (kcal)</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-box-val" id="profileTDEE">--</span>
+            <span class="stat-box-lbl">TDEE (kcal)</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-box-val" id="profileBMI">--</span>
+            <span class="stat-box-lbl">BMI</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-box-val" id="profileBMIcat">--</span>
+            <span class="stat-box-lbl">Category</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="danger-zone">
+        <h3>&#9888; Reset Data</h3>
+        <button class="btn btn-danger" id="resetAllBtn">Reset All Data</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
