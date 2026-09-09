@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "FitTrack",
+    "slug": "fittrack",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0f0f1a",
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0f0f1a"
+      },
+      "permissions": [
+        "android.permission.ACTIVITY_RECOGNITION",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.VIBRATE"
+      ],
+      "package": "com.fittrack.app"
+    },
+    "ios": {
+      "bundleIdentifier": "com.fittrack.app",
+      "infoPlist": {
+        "NSMotionUsageDescription": "FitTrack uses motion data to count your steps automatically.",
+        "NSHealthShareUsageDescription": "FitTrack reads step data from HealthKit."
+      }
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "color": "#6c63ff"
+        }
+      ],
+      [
+        "expo-sensors",
+        {
+          "motionPermission": "Allow FitTrack to access motion sensors to count steps."
+        }
+      ]
+    ]
+  }
+}
